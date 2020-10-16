@@ -66,7 +66,7 @@ class wakeupInstanceThread(threading.Thread):
 
     def __isInstanceOnline(self):
         try:
-            self.webDriver.get('https://'+self.instanceId+'.service-now.com/')
+            self.webDriver.get('https://'+self.instanceID+'.service-now.com/')
             self.webDriver.find_element_by_class_name('instance-hibernating-page')
             return False
         except Exception as e:
