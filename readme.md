@@ -31,6 +31,6 @@ If you have 4-5 instances to Wakeup everyday it becomes boring 💤
 - Correct version of [geckodriver](https://github.com/mozilla/geckodriver/releases "GitHub geckodriver") (Download Version Supported by firefox installed on your PC)
 
 ### Setup 
- - Download geckodriver and Replace one in project.
+ - Download correct version of geckodriver and Replace one in project.
  - Enter Instance Details in InstanceCreads.JSON 
  - Run main.py eg.` python main.py `

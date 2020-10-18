@@ -22,7 +22,7 @@ class wakeupInstanceThread(threading.Thread):
         self.instanceUserName = instance['user_name']
         self.instancePassword = instance['password']
         self.instanceName = instance['name'] + '[' + self.instanceID + ']'
-        self.__setBrowserDriver()
+        
 
     def run(self):
         print(self.instanceName + ".....")
@@ -36,8 +36,8 @@ class wakeupInstanceThread(threading.Thread):
                     print('waiting for 5 min')
                     self.__externalWaitSeconds(300)
                 self.instance['attempt'] += 1
+                self.__setBrowserDriver()
                 self.__loginToServiceNow()
-                self.__goToInstanceWakupPage() 
                 if self.__isInstanceOnline(): 
                     self.__markInstanceOnline()
                     self.webDriver.quit()
@@ -74,7 +74,7 @@ class wakeupInstanceThread(threading.Thread):
 
     def __setBrowserDriver(self):
         options = Options()
-        options.headless = True
+        # options.headless = True
         driver = webdriver.Firefox(
             options=options, executable_path='geckodriver.exe')
         driver.get("https://signon.service-now.com/ssologin.do?RelayState=%252Fapp%252Ftemplate_saml_2_0%252Fk317zlfESMUHAFZFXMVB%252Fsso%252Fsaml%253FRelayState%253Dhttps%25253A%25252F%25252Fdeveloper.servicenow.com%25252Fsaml_redirector.do%25253Fsysparm_nostack%25253Dtrue%252526sysparm_uri%25253D%2525252Fnav_to.do%2525253Furi%2525253D%252525252Fssologin.do%252525253FrelayState%252525253Dhttps%25252525253A%25252525252F%25252525252Fdeveloper.servicenow.com%25252525252Fdev.do&redirectUri=&email=")
@@ -98,14 +98,18 @@ class wakeupInstanceThread(threading.Thread):
     def __markInstanceOnline(self):
         print(self.instanceName+" : Online")
         self.instance['status'] = 'online'
+        self.webDriver.quit()
 
     def __setInstanceStatusUnknown(self):
         print(self.instanceName + " : Offline Waking Instance...")
         self.instance['status'] = 'unknown' 
+        self.__goToInstanceWakupPage() 
+        self.webDriver.quit()
 
     def __ErrorWithInstance(self):
         print(self.instanceName + ' : Problem with instance ')
-        print('https://'+self.instanceID+'.service-now.com/')      
+        print('https://'+self.instanceID+'.service-now.com/') 
+        self.webDriver.quit()     
 
 def main():
     instanceCreds = json.loads(open("instanceCreds.json").read())
