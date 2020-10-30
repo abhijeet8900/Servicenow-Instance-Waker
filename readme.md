@@ -32,5 +32,5 @@ If you have 4-5 instances to Wakeup everyday it becomes boring 💤
 
 ### Setup 
  - Download correct version of geckodriver and Replace one in project.
- - Enter Instance Details in InstanceCreads.JSON 
+ - Enter Instance Details in instances.xlsx
  - Run main.py eg.` python main.py `

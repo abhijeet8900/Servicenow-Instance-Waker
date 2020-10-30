@@ -5,14 +5,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
-import json
+from openpyxl import load_workbook
 import time
 import notification
 import threading
 
 MAX_TRY = 5
 
-# TODO: Refactor *********
+
 class wakeupInstanceThread(threading.Thread):
     def __init__(self, threadID, instance):
         threading.Thread.__init__(self)
@@ -111,8 +111,26 @@ class wakeupInstanceThread(threading.Thread):
         print('https://'+self.instanceID+'.service-now.com/') 
         self.webDriver.quit()     
 
+
+def getInstanceCredentials():
+    wb = load_workbook(filename='instances.xlsx')
+    ws = wb['Credentials']
+    creds = []
+    for row in ws.iter_rows(min_row=2):
+        instance_name = row[0].value
+        instance_user_name = row[1].value
+        instance_password = row[2].value
+        instance_id = row[3].value
+        creds.append({
+            "name" : instance_name,
+            "user_name" : instance_user_name,
+            "password" : instance_password,
+            "id" : instance_id
+        })
+    return creds
+
 def main():
-    instanceCreds = json.loads(open("instanceCreds.json").read())
+    instanceCreds = getInstanceCredentials()
     for creds in instanceCreds:
         creds['status'] = 'unknown'
         creds['attempt'] = 0
