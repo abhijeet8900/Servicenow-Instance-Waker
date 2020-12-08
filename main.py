@@ -22,15 +22,13 @@ class wakeupInstanceThread(threading.Thread):
         self.instanceUserName = instance['user_name']
         self.instancePassword = instance['password']
         self.instanceName = instance['name'] + '[' + self.instanceID + ']'
-        
 
     def run(self):
         print(self.instanceName + ".....")
         self.__wakupInstance()
 
     def __wakupInstance(self):
-        attempts = self.instance['attempt']
-        while attempts < MAX_TRY:
+        while self.instance['attempt'] < MAX_TRY:
             if self.instance['status'] != 'online':
                 if self.instance['attempt'] > 0:
                     print('waiting for 5 min')
@@ -38,24 +36,25 @@ class wakeupInstanceThread(threading.Thread):
                 self.instance['attempt'] += 1
                 self.__setBrowserDriver()
                 self.__loginToServiceNow()
-                if self.__isInstanceOnline(): 
+                if self.__isInstanceOnline():
                     self.__markInstanceOnline()
                     self.webDriver.quit()
                     return True
-                else: self.__setInstanceStatusUnknown()
+                else:
+                    self.__setInstanceStatusUnknown()
             else:
-                if self.instance['attempts'] == MAX_TRY and self.instance['status'] == 'unknown': 
+                if self.instance['attempt'] == MAX_TRY and self.instance['status'] == 'unknown':
                     self.__ErrorWithInstance()
                     self.webDriver.quit()
                     return False
-                else: 
+                else:
                     self.__markInstanceOnline()
                     self.webDriver.quit()
                     return True
 
     def __implicitWait(self, sec):
         self.webDriver.implicitly_wait(sec)
-        
+
     def __waitEleTobeSelecteable(self, id):
         return WebDriverWait(self.webDriver, 10).until(
             EC.element_to_be_clickable((By.ID, id))
@@ -67,7 +66,8 @@ class wakeupInstanceThread(threading.Thread):
     def __isInstanceOnline(self):
         try:
             self.webDriver.get('https://'+self.instanceID+'.service-now.com/')
-            self.webDriver.find_element_by_class_name('instance-hibernating-page')
+            self.webDriver.find_element_by_class_name(
+                'instance-hibernating-page')
             return False
         except Exception as e:
             return True
@@ -86,13 +86,14 @@ class wakeupInstanceThread(threading.Thread):
         self.webDriver.find_element_by_id('usernameSubmitButton').click()
         password_Input = self.__waitEleTobeSelecteable('password')
         password_Input.send_keys(self.instancePassword)
+        self.__externalWaitSeconds(3)
         self.webDriver.find_element_by_id('submitButton').click()
         self.__implicitWait(5)
         self.__externalWaitSeconds(10)
 
     def __goToInstanceWakupPage(self):
         self.webDriver.get(
-                        'https://developer.servicenow.com/dev_app.do#!/instance?wu=true')
+            'https://developer.servicenow.com/dev_app.do#!/instance?wu=true')
         self.__externalWaitSeconds(10)
 
     def __markInstanceOnline(self):
@@ -102,14 +103,14 @@ class wakeupInstanceThread(threading.Thread):
 
     def __setInstanceStatusUnknown(self):
         print(self.instanceName + " : Offline Waking Instance...")
-        self.instance['status'] = 'unknown' 
-        self.__goToInstanceWakupPage() 
+        self.instance['status'] = 'unknown'
+        self.__goToInstanceWakupPage()
         self.webDriver.quit()
 
     def __ErrorWithInstance(self):
         print(self.instanceName + ' : Problem with instance ')
-        print('https://'+self.instanceID+'.service-now.com/') 
-        self.webDriver.quit()     
+        print('https://'+self.instanceID+'.service-now.com/')
+        self.webDriver.quit()
 
 
 def getInstanceCredentials():
@@ -122,12 +123,13 @@ def getInstanceCredentials():
         instance_password = row[2].value
         instance_id = row[3].value
         creds.append({
-            "name" : instance_name,
-            "user_name" : instance_user_name,
-            "password" : instance_password,
-            "id" : instance_id
+            "name": instance_name,
+            "user_name": instance_user_name,
+            "password": instance_password,
+            "id": instance_id
         })
     return creds
+
 
 def main():
     instanceCreds = getInstanceCredentials()
@@ -141,14 +143,18 @@ def main():
         t = wakeupInstanceThread(id, instance)
         t.start()
 
-    while threadsBefore != threading.activeCount(): 
+    while threadsBefore != threading.activeCount():
         time.sleep(1)
 
     Error = False
     for instance in instanceCreds:
-        if instance['status'] != 'online': Error = True
+        if instance['status'] != 'online':
+            Error = True
 
-    if Error : notification.fail_noise()
-    else : notification.success_noise()
+    if Error:
+        notification.fail_noise()
+    else:
+        notification.success_noise()
+
 
 main()
