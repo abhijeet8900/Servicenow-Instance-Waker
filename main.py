@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
+
 from openpyxl import load_workbook
 import time
 import notification
@@ -12,7 +13,7 @@ import threading
 
 MAX_TRY = 5
 
-
+# Test Brach code
 class wakeupInstanceThread(threading.Thread):
     def __init__(self, threadID, instance):
         threading.Thread.__init__(self)
@@ -73,10 +74,13 @@ class wakeupInstanceThread(threading.Thread):
             return True
 
     def __setBrowserDriver(self):
-        options = Options()
+        options = webdriver.FirefoxOptions()  # Options()
         options.headless = True
-        driver = webdriver.Firefox(
-            options=options, executable_path='geckodriver.exe')
+        capabilities = dict({"marionette": True})
+        # capabilities[""] = False
+        driver = webdriver.Firefox(capabilities=capabilities,
+                                   options=options, executable_path='geckodriver.exe')
+        WebDriverWait(driver, 300)
         driver.get("https://signon.service-now.com/ssologin.do?RelayState=%252Fapp%252Ftemplate_saml_2_0%252Fk317zlfESMUHAFZFXMVB%252Fsso%252Fsaml%253FRelayState%253Dhttps%25253A%25252F%25252Fdeveloper.servicenow.com%25252Fsaml_redirector.do%25253Fsysparm_nostack%25253Dtrue%252526sysparm_uri%25253D%2525252Fnav_to.do%2525253Furi%2525253D%252525252Fssologin.do%252525253FrelayState%252525253Dhttps%25252525253A%25252525252F%25252525252Fdeveloper.servicenow.com%25252525252Fdev.do&redirectUri=&email=")
         self.webDriver = driver
 
